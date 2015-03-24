@@ -501,10 +501,6 @@ static void cpufreq_interactive_timer(unsigned long data)
 		goto rearm;
 	}
 
-	/*
-	 * Do not scale below floor_freq unless we have been at or above the
-	 * floor frequency for the minimum sample time since last validated.
-	 */
 	max_fvtime = max(pcpu->floor_validate_time, pcpu->local_fvtime);
 	if (new_freq < pcpu->floor_freq &&
 	    pcpu->target_freq >= pcpu->policy->cur) {
