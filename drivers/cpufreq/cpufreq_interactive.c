@@ -205,7 +205,6 @@ static void cpufreq_interactive_timer_resched(unsigned long cpu,
 		ppol->policy_timer.expires = expires;
 		add_timer(&ppol->policy_timer);
 	}
-
 	if (tunables->timer_slack_val >= 0 &&
 	    ppol->target_freq > ppol->policy->min) {
 		expires += usecs_to_jiffies(tunables->timer_slack_val);
