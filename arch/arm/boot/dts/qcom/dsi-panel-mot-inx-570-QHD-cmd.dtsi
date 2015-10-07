@@ -27,7 +27,7 @@
 		qcom,mdss-dsi-panel-height = <2560>;
 		qcom,mdss-pan-physical-width-dimension = <70>;
 		qcom,mdss-pan-physical-height-dimension = <125>;
-		qcom,mdss-dsi-panel-clockrate = <902000000>;
+		qcom,mdss-dsi-panel-clockrate = <770000000>;
 		qcom,mdss-dsi-h-front-porch = <120>;
 		qcom,mdss-dsi-h-back-porch = <44>;
 		qcom,mdss-dsi-h-pulse-width = <16>;
@@ -51,12 +51,12 @@
 		qcom,mdss-dsi-lane-2-state;
 		qcom,mdss-dsi-lane-3-state;
 		qcom,mdss-dsi-tx-eot-append;
-		qcom,mdss-dsi-panel-timings = [EE 38 26 00 6A 6C 2C 3C 2C 03
+		qcom,mdss-dsi-panel-timings = [CA 30 20 00 5C 62 24 34 26 03
 									04 00];
 		qcom,mdss-dsi-reset-sequence = <0 11>, <1 11>, <0 1>, <1 11>;
 		qcom,mdss-dsi-lp11-init;
 		qcom,mdss-dsi-t-clk-post = <0x2d>;
-		qcom,mdss-dsi-t-clk-pre = <0x2c>;
+		qcom,mdss-dsi-t-clk-pre = <0x26>;
 		qcom,mdss-dsi-bl-max-level = <255>;
 		qcom,mdss-dsi-dma-trigger = "trigger_sw";
 		qcom,mdss-dsi-mdp-trigger = "none";
@@ -164,6 +164,9 @@
 		/* for Dynamic CABC */
 		qcom,mdss-dsi-cabc-ui-command = [15 01 00 00 00 00 02 55 01];
 		qcom,mdss-dsi-cabc-mv-command = [15 01 00 00 00 00 02 55 03];
+
+		qcom,panel-roi-alignment = <720 720 16 16 0 0>;
+		qcom,partial-update-enabled;
 	};
 
 	mot_inx_570_QHD_1_cmd_v0: qcom,mdss_dsi_mot_inx_570_QHD_dualmipi1_cmd_v0 {
@@ -181,7 +184,7 @@
 		qcom,mdss-dsi-panel-height = <2560>;
 		qcom,mdss-pan-physical-width-dimension = <70>;
 		qcom,mdss-pan-physical-height-dimension = <125>;
-		qcom,mdss-dsi-panel-clockrate = <902000000>;
+		qcom,mdss-dsi-panel-clockrate = <770000000>;
 		qcom,mdss-dsi-h-front-porch = <120>;
 		qcom,mdss-dsi-h-back-porch = <44>;
 		qcom,mdss-dsi-h-pulse-width = <16>;
@@ -206,11 +209,11 @@
 		qcom,mdss-dsi-lane-2-state;
 		qcom,mdss-dsi-lane-3-state;
 		qcom,mdss-dsi-tx-eot-append;
-		qcom,mdss-dsi-panel-timings = [EE 38 26 00 6A 6C 2C 3C 2C 03
+		qcom,mdss-dsi-panel-timings = [CA 30 20 00 5C 62 24 34 26 03
 									04 00];
 		qcom,mdss-dsi-lp11-init;
 		qcom,mdss-dsi-t-clk-post = <0x2d>;
-		qcom,mdss-dsi-t-clk-pre = <0x2c>;
+		qcom,mdss-dsi-t-clk-pre = <0x26>;
 		qcom,mdss-dsi-dma-trigger = "trigger_sw";
 		qcom,mdss-dsi-mdp-trigger = "none";
 		qcom,mdss-dsi-te-pin-select = <1>;
@@ -219,5 +222,8 @@
 		qcom,mdss-dsi-te-dcs-command = <1>;
 		qcom,mdss-dsi-te-check-enable;
 		qcom,mdss-dsi-te-using-te-pin;
+
+		qcom,panel-roi-alignment = <720 720 16 16 0 0>;
+		qcom,partial-update-enabled;
 	};
 };

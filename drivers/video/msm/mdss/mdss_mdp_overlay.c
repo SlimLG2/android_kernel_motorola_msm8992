@@ -3872,93 +3872,17 @@ static int mdss_bl_scale_config(struct msm_fb_data_type *mfd,
 	return ret;
 }
 
-static int mdss_mdp_pp_is_disable_op(struct msmfb_mdp_pp *pp)
-{
-	int flags = 0, ret = 0;
-	switch (pp->op) {
-	case mdp_op_pa_cfg:
-		flags = pp->data.pa_cfg_data.pa_data.flags;
-		break;
-	case mdp_op_pa_v2_cfg:
-		flags = pp->data.pa_v2_cfg_data.pa_v2_data.flags;
-		break;
-	case mdp_op_pcc_cfg:
-		flags = pp->data.pcc_cfg_data.ops;
-		break;
-	case mdp_op_lut_cfg:
-		switch (pp->data.lut_cfg_data.lut_type) {
-		case mdp_lut_igc:
-			flags = pp->data.lut_cfg_data.data.igc_lut_data.ops;
-			break;
-		case mdp_lut_pgc:
-			flags = pp->data.lut_cfg_data.data.pgc_lut_data.flags;
-			break;
-		case mdp_lut_hist:
-			flags = pp->data.lut_cfg_data.data.hist_lut_data.ops;
-			break;
-		default:
-			break;
-		}
-		break;
-	case mdp_op_dither_cfg:
-		flags = pp->data.dither_cfg_data.flags;
-		break;
-	case mdp_op_gamut_cfg:
-		flags = pp->data.gamut_cfg_data.flags;
-		break;
-	case mdp_op_ad_cfg:
-		flags = pp->data.ad_init_cfg.ops;
-		break;
-	case mdp_bl_scale_cfg:
-		flags = MDP_PP_OPS_DISABLE;
-		break;
-	case mdp_op_ad_input:
-	case mdp_op_calib_cfg:
-	case mdp_op_calib_mode:
-	case mdp_op_calib_buffer:
-	case mdp_op_calib_dcm_state:
-		break;
-	default:
-		pr_err("Unsupported request to MDP_PP IOCTL. %d = op\n",
-			pp->op);
-		break;
-	}
-	if (flags & MDP_PP_OPS_DISABLE)
-		ret = 1;
-	return ret;
-}
-
 static int mdss_mdp_pp_ioctl(struct msm_fb_data_type *mfd,
 				void __user *argp)
 {
 	int ret;
 	struct msmfb_mdp_pp mdp_pp;
-	struct mdss_data_type *mdata = mdss_mdp_get_mdata();
 	u32 copyback = 0;
 	u32 copy_from_kernel = 0;
-	struct mdss_overlay_private *mdp5_data = mfd_to_mdp5_data(mfd);
-
-	if (!mdata)
-		return -EPERM;
 
 	ret = copy_from_user(&mdp_pp, argp, sizeof(mdp_pp));
 	if (ret)
 		return ret;
-
-	/* Support only PP init cfg op if partial update is enabled for allowing
-	 * overriding of partial update
-	*/
-	if (mdata->pp_enable == MDP_PP_DISABLE &&
-				mdp_pp.op != mdp_op_pp_init_cfg) {
-		pr_err("Partial update feature is enabled\n");
-		return -EPERM;
-	}
-
-	if (mfd->panel_info->partial_update_enabled && mdp5_data->dyn_pu_state
-			&& !mdss_mdp_pp_is_disable_op(&mdp_pp)) {
-		pr_debug("Partial update feature is enabled.\n");
-		return -EPERM;
-	}
 
 	/* Supprt only MDP register read/write and
 	exit_dcm in DCM state*/
@@ -4048,10 +3972,6 @@ static int mdss_mdp_pp_ioctl(struct msm_fb_data_type *mfd,
 	case mdp_op_calib_dcm_state:
 		ret = mdss_fb_dcm(mfd, mdp_pp.data.calib_dcm.dcm_state);
 		break;
-	case mdp_op_pp_init_cfg:
-		ret = mdss_mdp_pp_override_pu(
-				mdp_pp.data.init_data.init_request);
-		break;
 	default:
 		pr_err("Unsupported request to MDP_PP IOCTL. %d = op\n",
 								mdp_pp.op);
@@ -4076,11 +3996,6 @@ static int mdss_mdp_histo_ioctl(struct msm_fb_data_type *mfd, u32 cmd,
 
 	if (!mdata)
 		return -EPERM;
-
-	if (mdata->pp_enable == MDP_PP_DISABLE) {
-		pr_err("Partial update feature is enabled\n");
-		return -EPERM;
-	}
 
 	if (mfd->panel_info->partial_update_enabled && mdp5_data->dyn_pu_state
 			&& (cmd != MSMFB_HISTOGRAM_STOP)) {
@@ -5336,11 +5251,6 @@ int mdss_mdp_overlay_init(struct msm_fb_data_type *mfd)
 	mfd->wait_for_kickoff = true;
 	if (is_panel_split(mfd) && mdp5_data->mdata->has_pingpong_split)
 		mfd->split_mode = MDP_PINGPONG_SPLIT;
-
-	if (mfd->panel_info->partial_update_enabled)
-		mdp5_data->mdata->pp_enable = MDP_PP_DISABLE;
-	else
-		mdp5_data->mdata->pp_enable = MDP_PP_ENABLE;
 
 	rc = mdss_mdp_overlay_fb_parse_dt(mfd);
 	if (rc)

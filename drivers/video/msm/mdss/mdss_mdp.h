@@ -32,6 +32,9 @@
 #define MDSS_MDP_CURSOR_SIZE (MDSS_MDP_CURSOR_WIDTH*MDSS_MDP_CURSOR_WIDTH*4)
 #define MDSS_MDP_PIXEL_RAM_SIZE (50 * 1024)
 
+#define SVS_PLUS_MIN_HW_110 171430000
+#define SVS_PLUS_MAX_HW_110 266670000
+
 #define PHASE_STEP_SHIFT	21
 #define MAX_LINE_BUFFER_WIDTH	2048
 #define MAX_MIXER_HEIGHT	0xFFFF
@@ -859,6 +862,14 @@ static inline u32 left_lm_w_from_mfd(struct msm_fb_data_type *mfd)
 	return width;
 }
 
+static inline bool __is_mdp_clk_svs_plus_range(struct mdss_data_type *mdata,
+		u32 rate)
+{
+	return (mdss_has_quirk(mdata, MDSS_QUIRK_SVS_PLUS_VOTING)) &&
+		(rate > mdata->svs_plus_min) &&
+		(rate <= mdata->svs_plus_max);
+}
+
 int mdss_mdp_cmd_ctx_is_pingpong_split_slave(struct mdss_mdp_ctl *ctl);
 irqreturn_t mdss_mdp_isr(int irq, void *ptr);
 int mdss_iommu_attach(struct mdss_data_type *mdata);
@@ -984,7 +995,6 @@ int mdss_mdp_csc_setup_data(u32 block, u32 blk_idx, struct mdp_csc_cfg *data);
 
 int mdss_mdp_pp_init(struct device *dev);
 void mdss_mdp_pp_term(struct device *dev);
-int mdss_mdp_pp_override_pu(int enable);
 int mdss_mdp_pp_overlay_init(struct msm_fb_data_type *mfd);
 
 int mdss_mdp_pp_resume(struct mdss_mdp_ctl *ctl, u32 mixer_num);

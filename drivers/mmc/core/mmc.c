@@ -595,7 +595,7 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
 		card->ext_csd.data_sector_size = 512;
 	}
 
-	/* eMMC v4.5 or later */
+	/* eMMC v5 or later */
 	if (card->ext_csd.rev >= 7) {
 		card->ext_csd.firmware_version[0] =
 			ext_csd[EXT_CSD_FIRMWARE_VERSION + 0] << 0 |
@@ -625,6 +625,10 @@ static int mmc_read_ext_csd(struct mmc_card *card, u8 *ext_csd)
 		memcpy(card->ext_csd.vendor_health_report,
 		       &ext_csd[EXT_CSD_VENDOR_PROPRIETARY_HEALTH_REPORT],
 		       sizeof(card->ext_csd.vendor_health_report));
+		card->ext_csd.ffu_capable =
+			((ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1) == 0x1) &&
+			((ext_csd[EXT_CSD_FW_CONFIG] & 0x1) == 0x0);
+		card->ext_csd.ffu_mode_op = ext_csd[EXT_CSD_FFU_FEATURES];
 	}
 out:
 	return err;
@@ -1470,6 +1474,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 	u32 cid[4];
 	u32 rocr;
 	u8 *ext_csd = NULL;
+	bool scan = (oldcard == NULL);
 
 	BUG_ON(!host);
 	WARN_ON(!host->claimed);
@@ -1521,6 +1526,15 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 	}
 
 	if (oldcard) {
+		if (oldcard->raw_cid[0] == 0 && oldcard->raw_cid[1] == 0 &&
+		    oldcard->raw_cid[2] == 0 && oldcard->raw_cid[3] == 0) {
+			scan = true;
+			pr_info("%s: updating card identification\n", mmc_hostname(host));
+			memcpy(oldcard->raw_cid, cid, sizeof(oldcard->raw_cid));
+			err = mmc_decode_cid(oldcard);
+			if (err)
+				goto err;
+		}
 		if (memcmp(cid, oldcard->raw_cid, sizeof(cid)) != 0) {
 			err = -ENOENT;
 			pr_err("%s: %s: CID memcmp failed %d\n",
@@ -1562,7 +1576,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 		mmc_set_bus_mode(host, MMC_BUSMODE_PUSHPULL);
 	}
 
-	if (!oldcard) {
+	if (scan) {
 		/*
 		 * Fetch CSD from card.
 		 */
@@ -1599,7 +1613,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 		}
 	}
 
-	if (!oldcard) {
+	if (scan) {
 		/*
 		 * Fetch and process extended CSD.
 		 */
