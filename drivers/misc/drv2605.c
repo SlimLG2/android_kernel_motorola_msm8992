@@ -150,7 +150,7 @@
 #define REAL_TIME_PLAYBACK_STRENGTH 0x7F
 #else
 /* 100% of overdrive voltage (open loop) */
-#define REAL_TIME_PLAYBACK_STRENGTH 0x7F
+#define REAL_TIME_PLAYBACK_STRENGTH 0x64
 #endif
 
 #define MAX_TIMEOUT 15000	/* 15s */
