@@ -51,7 +51,7 @@ static int suspend_cpu_num = 2, resume_cpu_num = (NR_CPUS -1);
 static int endurance_level = 0;
 static int core_limit = NR_CPUS;
 
-static int now[8], last_time[8];
+static int now[6], last_time[6];
 
 static int sampling_time = DEF_SAMPLING_MS;
 static int load_threshold = DEFAULT_CPU_LOAD_THRESHOLD;
@@ -76,7 +76,7 @@ static struct delayed_work tplug_boost;
 static struct workqueue_struct *tplug_resume_wq;
 static struct delayed_work tplug_resume_work;
 
-static unsigned int last_load[8] = { 0 };
+static unsigned int last_load[6] = { 0 };
 
 struct cpu_load_data {
 	u64 prev_cpu_idle;
@@ -104,8 +104,8 @@ static inline void offline_cpus(void)
 				suspend_cpu_num = NR_CPUS / 2;
 		break;
 		case 2:
-			if( NR_CPUS >=4 && suspend_cpu_num > NR_CPUS / 4)
-				suspend_cpu_num = NR_CPUS / 4;
+			if( NR_CPUS >=4 && suspend_cpu_num > NR_CPUS / 3)
+				suspend_cpu_num = NR_CPUS / 3;
 		break;
 		default:
 		break;
@@ -126,8 +126,8 @@ static inline void cpus_online_all(void)
 			resume_cpu_num = ((NR_CPUS / 2) - 1);
 	break;
 	case 2:
-		if( NR_CPUS >= 4 && resume_cpu_num > ((NR_CPUS / 4) - 1))
-			resume_cpu_num = ((NR_CPUS / 4) - 1);
+		if( NR_CPUS >= 4 && resume_cpu_num > ((NR_CPUS / 3) - 1))
+			resume_cpu_num = ((NR_CPUS / 3) - 1);
 	break;
 	case 0:
 			resume_cpu_num = (NR_CPUS - 1);
@@ -405,7 +405,7 @@ static void __cpuinit tplug_resume_work_fn(struct work_struct *work)
 static void __cpuinit tplug_work_fn(struct work_struct *work)
 {
 	int i;
-	unsigned int load[8], avg_load[8];
+	unsigned int load[6], avg_load[6];
 
 	switch(endurance_level)
 	{
@@ -416,7 +416,7 @@ static void __cpuinit tplug_work_fn(struct work_struct *work)
 		core_limit = NR_CPUS / 2;
 	break;
 	case 2:
-		core_limit = NR_CPUS / 4;
+		core_limit = NR_CPUS / 3;
 	break;
 	default:
 		core_limit = NR_CPUS;
