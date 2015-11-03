@@ -392,7 +392,9 @@ KBUILD_CFLAGS   := $(GRAPHITE)  -O2 -Wall -Wno-pointer-to-int-cast -Wundef -Wstr
 		-Wno-maybe-uninitialized -Wno-array-bounds \
 		   -fmodulo-sched -fmodulo-sched-allow-regmoves -fno-tree-vectorize -ffast-math \
        -funswitch-loops -fpredictive-commoning -fgcse-after-reload \
-		   -fno-aggressive-loop-optimizations
+		   -fno-aggressive-loop-optimizations \
+		   -march=armv8-a+crc -mtune=cortex-a57.cortex-a53 -mcpu=cortex-a57.cortex-a53
+
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
 KBUILD_AFLAGS   := -D__ASSEMBLY__
